@@ -167,38 +167,12 @@ export function HoldComposer({
 
   return (
     <Card className="w-full max-w-[820px] mx-auto border border-border/80 shadow-sm bg-card transition-all">
-      <CardHeader className="pb-3 pt-5 px-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex flex-col gap-1">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              What are you sending?
-            </span>
-            <ContextToggle value={context} onChange={setContext} disabled={isLoading} />
-          </div>
-
-          {/* Scenario quick chips */}
-          <div className="flex flex-col sm:items-end gap-1">
-            <span className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">
-              Quick scenarios
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {examples.map((ex) => (
-                <button
-                  type="button"
-                  key={ex.name}
-                  onClick={() => handleSelectExample(ex)}
-                  disabled={isLoading}
-                  title={`Load ${ex.name}`}
-                  aria-label={
-                    ex.name === "Hostile support reply" ? "Hostile support reply Frustrated support reply" : ex.name
-                  }
-                  className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md border border-border/70 bg-muted/30 text-foreground/80 hover:bg-muted hover:text-foreground hover:border-border transition-colors cursor-pointer disabled:opacity-50"
-                >
-                  <span>{ex.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+      <CardHeader className="pb-2 pt-5 px-6">
+        <div className="flex flex-col gap-1.5">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            What are you sending?
+          </span>
+          <ContextToggle value={context} onChange={setContext} disabled={isLoading} />
         </div>
       </CardHeader>
 
@@ -213,8 +187,8 @@ export function HoldComposer({
           <FieldGroup>
             <Field data-invalid={Boolean(validationError || isTooLong)}>
               <div className="flex items-center justify-between">
-                <FieldLabel htmlFor="draft" className="text-xs font-semibold text-foreground">
-                  Your draft <span className="text-muted-foreground font-normal ml-1">Required</span>
+                <FieldLabel htmlFor="draft" className="text-sm font-semibold text-foreground">
+                  Your draft <span className="text-muted-foreground font-normal ml-1 text-xs">Required</span>
                 </FieldLabel>
                 <span
                   className={`text-xs tabular-nums font-medium ${
@@ -236,19 +210,19 @@ export function HoldComposer({
                 }}
                 onKeyDown={handleKeyDown}
                 placeholder={placeholders[context]}
-                rows={6}
+                rows={5}
                 maxLength={8000}
                 disabled={isLoading}
                 aria-invalid={Boolean(validationError || isTooLong)}
                 aria-describedby="draft-description"
-                className="resize-y text-base min-h-[140px] max-h-[400px] leading-relaxed font-normal bg-background/50 focus:bg-background transition-colors"
+                className="resize-y text-base sm:text-sm min-h-[110px] sm:min-h-[120px] max-h-[360px] leading-relaxed font-normal bg-background/50 focus:bg-background border border-border shadow-xs focus-visible:border-foreground/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 transition-colors"
               />
 
               <div
                 id="draft-description"
-                className="flex items-center justify-between text-xs text-muted-foreground pt-0.5"
+                className="flex items-center justify-between text-sm text-foreground/80 pt-0.5"
               >
-                <FieldDescription>
+                <FieldDescription className="text-sm text-foreground/80">
                   Keep the words yours. HOLD only judges them before they leave the room.
                 </FieldDescription>
               </div>
@@ -257,23 +231,42 @@ export function HoldComposer({
             </Field>
           </FieldGroup>
 
+          {/* Secondary "Try an example" row below textarea */}
+          <div className="flex flex-wrap items-center gap-2 pt-0.5">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Try an example:
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {examples.map((ex) => (
+                <button
+                  type="button"
+                  key={ex.name}
+                  onClick={() => handleSelectExample(ex)}
+                  disabled={isLoading}
+                  title={`Load ${ex.name}`}
+                  aria-label={
+                    ex.name === "Hostile support reply" ? "Hostile support reply Frustrated support reply" : ex.name
+                  }
+                  className="inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-md border border-border bg-muted/40 text-foreground hover:bg-muted hover:border-foreground/30 transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  <span>{ex.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Optional context collapsible */}
           <Collapsible open={showOptions} onOpenChange={setShowOptions} className="w-full">
-            <CollapsibleTrigger className="h-8 px-2 text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1.5 cursor-pointer rounded-lg hover:bg-muted/50 transition-colors">
-              <HugeiconsIcon
-                icon={showOptions ? ChevronUpIcon : ChevronDownIcon}
-                strokeWidth={2}
-                className="size-3.5"
-              />
+            <CollapsibleTrigger className="h-8 px-2 text-sm font-medium text-foreground/80 hover:text-foreground flex items-center gap-1.5 cursor-pointer rounded-lg hover:bg-muted/50 transition-colors">
+              <HugeiconsIcon icon={showOptions ? ChevronUpIcon : ChevronDownIcon} strokeWidth={2} className="size-4" />
               <span>{showOptions ? "Hide extra context" : "Add context (optional)"}</span>
-              <span className="text-[10px] text-muted-foreground/80 font-normal">— audience, intent, history</span>
+              <span className="text-xs text-muted-foreground font-normal">— audience, intent, history</span>
             </CollapsibleTrigger>
             <CollapsibleContent className="pt-3 flex flex-col gap-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Field>
-                  <FieldLabel htmlFor="audience" className="text-xs font-medium">
-                    Audience{" "}
-                    <span className="text-muted-foreground text-[11px] font-normal">(Who will read this?)</span>
+                  <FieldLabel htmlFor="audience" className="text-sm font-medium text-foreground">
+                    Audience <span className="text-muted-foreground text-xs font-normal">(Who will read this?)</span>
                   </FieldLabel>
                   <Input
                     id="audience"
@@ -282,12 +275,12 @@ export function HoldComposer({
                     placeholder="e.g. A busy prospective client"
                     maxLength={2000}
                     disabled={isLoading}
-                    className="h-9 text-xs"
+                    className="h-10 text-sm"
                   />
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor="intent" className="text-xs font-medium">
-                    Intent <span className="text-muted-foreground text-[11px] font-normal">(Desired outcome)</span>
+                  <FieldLabel htmlFor="intent" className="text-sm font-medium text-foreground">
+                    Intent <span className="text-muted-foreground text-xs font-normal">(Desired outcome)</span>
                   </FieldLabel>
                   <Input
                     id="intent"
@@ -296,16 +289,14 @@ export function HoldComposer({
                     placeholder="e.g. Schedule a 15-minute call without pressure"
                     maxLength={2000}
                     disabled={isLoading}
-                    className="h-9 text-xs"
+                    className="h-10 text-sm"
                   />
                 </Field>
               </div>
               <Field>
-                <FieldLabel htmlFor="conversation" className="text-xs font-medium">
+                <FieldLabel htmlFor="conversation" className="text-sm font-medium text-foreground">
                   Conversation context{" "}
-                  <span className="text-muted-foreground text-[11px] font-normal">
-                    (Prior messages or thread history)
-                  </span>
+                  <span className="text-muted-foreground text-xs font-normal">(Prior messages or thread history)</span>
                 </FieldLabel>
                 <Textarea
                   id="conversation"
@@ -315,7 +306,7 @@ export function HoldComposer({
                   rows={2}
                   maxLength={2000}
                   disabled={isLoading}
-                  className="text-xs resize-y min-h-[60px]"
+                  className="text-sm resize-y min-h-[70px] border border-border"
                 />
               </Field>
             </CollapsibleContent>
@@ -325,7 +316,7 @@ export function HoldComposer({
           {error && (
             <Alert variant="destructive" className="py-2.5">
               <HugeiconsIcon icon={InformationCircleIcon} strokeWidth={2} className="size-4" />
-              <AlertDescription className="text-xs font-medium">{error}</AlertDescription>
+              <AlertDescription className="text-sm font-medium">{error}</AlertDescription>
             </Alert>
           )}
 
@@ -336,8 +327,8 @@ export function HoldComposer({
               disabled={isLoading || !isDraftValid}
               className={`h-11 px-6 font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer ${
                 !isDraftValid
-                  ? "opacity-60 cursor-not-allowed bg-foreground/15 text-foreground/60 dark:bg-foreground/20"
-                  : "bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-[1.005] active:scale-[0.995]"
+                  ? "bg-muted text-foreground/75 border border-border/90 shadow-xs cursor-not-allowed opacity-95 dark:bg-muted/80 dark:text-foreground/80"
+                  : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm hover:shadow active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               }`}
             >
               {isLoading ? (
@@ -348,7 +339,13 @@ export function HoldComposer({
               ) : (
                 <>
                   <span>Judge before sending</span>
-                  <Kbd className="bg-primary-foreground/20 text-primary-foreground border-transparent text-[10px] px-1.5 h-4 font-mono">
+                  <Kbd
+                    className={`text-xs px-1.5 h-5 font-mono ${
+                      !isDraftValid
+                        ? "bg-foreground/10 text-foreground/80 border-border/60"
+                        : "bg-primary-foreground/20 text-primary-foreground border-transparent"
+                    }`}
+                  >
                     ⌘↵
                   </Kbd>
                   <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2.5} className="size-4 ml-0.5" />
@@ -356,7 +353,7 @@ export function HoldComposer({
               )}
             </Button>
 
-            <span className="text-xs text-muted-foreground/90 text-center sm:text-right">
+            <span className="text-xs font-medium text-muted-foreground text-center sm:text-right">
               Atomic signals evaluate in parallel
             </span>
           </div>
@@ -368,24 +365,24 @@ export function HoldComposer({
         <div className="flex flex-wrap items-center gap-4 sm:gap-6">
           <Tooltip>
             <TooltipTrigger className="inline-flex items-center gap-1.5 cursor-help hover:text-foreground transition-colors">
-              <HugeiconsIcon icon={FlashIcon} strokeWidth={2} className="size-3.5 text-muted-foreground" />
-              <span className="font-medium text-xs">One Jev request</span>
+              <HugeiconsIcon icon={FlashIcon} strokeWidth={2} className="size-4 text-foreground/70" />
+              <span className="font-medium text-xs text-foreground/80">One Jev request</span>
             </TooltipTrigger>
             <TooltipContent>11 atomic System One questions run in parallel in a single Jev request.</TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger className="inline-flex items-center gap-1.5 cursor-help hover:text-foreground transition-colors">
-              <HugeiconsIcon icon={SecurityCheckIcon} strokeWidth={2} className="size-3.5 text-muted-foreground" />
-              <span className="font-medium text-xs">Nothing stored</span>
+              <HugeiconsIcon icon={SecurityCheckIcon} strokeWidth={2} className="size-4 text-foreground/70" />
+              <span className="font-medium text-xs text-foreground/80">Nothing stored</span>
             </TooltipTrigger>
             <TooltipContent>HOLD has zero persistence. Drafts and judgments are never logged or stored.</TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger className="inline-flex items-center gap-1.5 cursor-help hover:text-foreground transition-colors">
-              <HugeiconsIcon icon={CpuIcon} strokeWidth={2} className="size-3.5 text-muted-foreground" />
-              <span className="font-medium text-xs">Typed verdict</span>
+              <HugeiconsIcon icon={CpuIcon} strokeWidth={2} className="size-4 text-foreground/70" />
+              <span className="font-medium text-xs text-foreground/80">Typed verdict</span>
             </TooltipTrigger>
             <TooltipContent>
               Deterministic code policy computes SEND, REWRITE, HOLD, or BLOCK from calibrated scores.
@@ -393,7 +390,7 @@ export function HoldComposer({
           </Tooltip>
         </div>
 
-        <span className="text-[11px] text-muted-foreground/70">HOLD by AETHER</span>
+        <span className="text-xs font-medium text-muted-foreground">HOLD by AETHER</span>
       </CardFooter>
     </Card>
   );

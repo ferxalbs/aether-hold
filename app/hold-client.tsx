@@ -105,9 +105,9 @@ export default function HoldClient() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col">
         {/* Focused hero: fits comfortably in 1440x900 without clipping */}
         <section className="hero text-center max-w-2xl mx-auto mb-6 sm:mb-8" id="judge">
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-muted/60 border border-border/60 text-[11px] font-semibold text-muted-foreground mb-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/60 border border-border/60 text-xs font-semibold text-muted-foreground mb-3">
             <span className="size-1.5 rounded-full bg-emerald-600 animate-pulse" />
-            <span>Pre-send judgment layer</span>
+            <span>Private second opinion</span>
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground leading-tight sm:leading-none">
             Should this be sent?
@@ -144,13 +144,6 @@ export default function HoldClient() {
               <div className="w-full max-w-[820px]">
                 <JudgmentLoading />
               </div>
-            )}
-
-            {!isLoading && (
-              <p className="text-xs text-muted-foreground/70 text-center max-w-md">
-                Paste an email, social post, or support reply. HOLD runs 11 atomic judgments in a single request and
-                returns a definitive decision.
-              </p>
             )}
           </div>
         ) : (

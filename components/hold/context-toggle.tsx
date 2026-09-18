@@ -40,9 +40,9 @@ export function ContextToggle({ value, onChange, disabled }: ContextToggleProps)
         <ToggleGroupItem
           key={opt.value}
           value={opt.value}
-          className="h-8 px-3 text-xs font-medium rounded-lg transition-all data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-xs data-[state=on]:font-semibold data-[state=off]:text-muted-foreground hover:text-foreground"
+          className="h-9 px-3.5 text-sm font-medium rounded-lg transition-all data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-xs data-[state=on]:font-semibold data-[state=off]:text-muted-foreground hover:text-foreground"
         >
-          <HugeiconsIcon icon={opt.icon} strokeWidth={2} data-icon="inline-start" className="size-3.5" />
+          <HugeiconsIcon icon={opt.icon} strokeWidth={2} data-icon="inline-start" className="size-4" />
           <span>{opt.label}</span>
         </ToggleGroupItem>
       ))}

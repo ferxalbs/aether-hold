@@ -107,7 +107,7 @@ export default function MethodPage() {
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
             A useful second opinion, with the edges showing.
           </h1>
-          <p className="text-base text-muted-foreground leading-relaxed max-w-2xl font-normal">
+          <p className="text-lg text-foreground/80 leading-relaxed max-w-2xl font-normal">
             HOLD is an open-source pre-send judgment layer. It uses calibrated, typed AI judgments as signals—not as an
             unguided oracle. Your code owns the final call.
           </p>
@@ -121,36 +121,36 @@ export default function MethodPage() {
             <HugeiconsIcon icon={FlashIcon} strokeWidth={2} className="size-5 text-foreground" />
             <h2 className="text-xl font-bold tracking-tight">1. How HOLD works</h2>
           </div>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-base text-foreground/80 leading-relaxed">
             When you submit a draft, HOLD makes exactly <strong>one batched request</strong> to TypeSafe Jev. It asks 11
             independent, atomic questions in parallel across the draft, context, and intent. The model returns
             calibrated probabilities and discrete choices, not generated text.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-            <Card className="bg-card border-border/70">
+            <Card className="bg-card border-border/70 shadow-xs">
               <CardHeader className="pb-2">
-                <span className="text-xs font-bold text-muted-foreground">STEP 01</span>
-                <CardTitle className="text-base">Draft submission</CardTitle>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">STEP 01</span>
+                <CardTitle className="text-base font-bold">Draft submission</CardTitle>
               </CardHeader>
-              <CardContent className="text-xs text-muted-foreground">
+              <CardContent className="text-sm text-foreground/80 leading-relaxed">
                 The draft and optional audience/intent metadata are sanitized and validated client- and server-side.
               </CardContent>
             </Card>
-            <Card className="bg-card border-border/70">
+            <Card className="bg-card border-border/70 shadow-xs">
               <CardHeader className="pb-2">
-                <span className="text-xs font-bold text-muted-foreground">STEP 02</span>
-                <CardTitle className="text-base">Parallel Jev query</CardTitle>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">STEP 02</span>
+                <CardTitle className="text-base font-bold">Parallel Jev query</CardTitle>
               </CardHeader>
-              <CardContent className="text-xs text-muted-foreground">
+              <CardContent className="text-sm text-foreground/80 leading-relaxed">
                 TypeSafe Jev evaluates 11 atomic dimensions in parallel in a single sub-second roundtrip.
               </CardContent>
             </Card>
-            <Card className="bg-card border-border/70">
+            <Card className="bg-card border-border/70 shadow-xs">
               <CardHeader className="pb-2">
-                <span className="text-xs font-bold text-muted-foreground">STEP 03</span>
-                <CardTitle className="text-base">Deterministic policy</CardTitle>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">STEP 03</span>
+                <CardTitle className="text-base font-bold">Deterministic policy</CardTitle>
               </CardHeader>
-              <CardContent className="text-xs text-muted-foreground">
+              <CardContent className="text-sm text-foreground/80 leading-relaxed">
                 Standard TypeScript code checks calibrated probabilities against versioned policy thresholds.
               </CardContent>
             </Card>
@@ -163,43 +163,43 @@ export default function MethodPage() {
             <HugeiconsIcon icon={CpuIcon} strokeWidth={2} className="size-5 text-foreground" />
             <h2 className="text-xl font-bold tracking-tight">2. What Jev evaluates</h2>
           </div>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-base text-foreground/80 leading-relaxed">
             TypeSafe Jev is a System One model trained specifically for fast, calibrated judgments rather than prose
             generation. HOLD consumes three fundamental System One primitives:
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-            <Card className="border-border/70">
+            <Card className="border-border/70 shadow-xs">
               <CardHeader className="pb-2">
-                <Badge variant="outline" className="w-fit font-mono text-[11px]">
+                <Badge variant="outline" className="w-fit font-mono text-xs">
                   Choice
                 </Badge>
-                <CardTitle className="text-sm pt-1">Categorical selection</CardTitle>
+                <CardTitle className="text-base font-bold pt-1">Categorical selection</CardTitle>
               </CardHeader>
-              <CardContent className="text-xs text-muted-foreground leading-relaxed">
+              <CardContent className="text-sm text-foreground/80 leading-relaxed">
                 Picks one option from a defined set with a full probability distribution and confidence score (e.g.
                 recommended action, tone classification).
               </CardContent>
             </Card>
-            <Card className="border-border/70">
+            <Card className="border-border/70 shadow-xs">
               <CardHeader className="pb-2">
-                <Badge variant="outline" className="w-fit font-mono text-[11px]">
+                <Badge variant="outline" className="w-fit font-mono text-xs">
                   Score
                 </Badge>
-                <CardTitle className="text-sm pt-1">Rubric grading</CardTitle>
+                <CardTitle className="text-base font-bold pt-1">Rubric grading</CardTitle>
               </CardHeader>
-              <CardContent className="text-xs text-muted-foreground leading-relaxed">
+              <CardContent className="text-sm text-foreground/80 leading-relaxed">
                 Evaluates a position on an ordered multi-level rubric, returning a probability-weighted score (e.g.
                 clarity, recipient value).
               </CardContent>
             </Card>
-            <Card className="border-border/70">
+            <Card className="border-border/70 shadow-xs">
               <CardHeader className="pb-2">
-                <Badge variant="outline" className="w-fit font-mono text-[11px]">
+                <Badge variant="outline" className="w-fit font-mono text-xs">
                   Noul
                 </Badge>
-                <CardTitle className="text-sm pt-1">Binary probability</CardTitle>
+                <CardTitle className="text-base font-bold pt-1">Binary probability</CardTitle>
               </CardHeader>
-              <CardContent className="text-xs text-muted-foreground leading-relaxed">
+              <CardContent className="text-sm text-foreground/80 leading-relaxed">
                 Returns the exact probability that a single proposition is true. Has no separate confidence field (e.g.
                 secret exposure, hostility, spam risk).
               </CardContent>
@@ -213,49 +213,49 @@ export default function MethodPage() {
             <HugeiconsIcon icon={SecurityCheckIcon} strokeWidth={2} className="size-5 text-foreground" />
             <h2 className="text-xl font-bold tracking-tight">3. Deterministic policy</h2>
           </div>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-base text-foreground/80 leading-relaxed">
             AI models should not decide their own rules. In HOLD, the policy engine is pure, testable TypeScript code.
             Verdict evaluation follows strict precedence:
           </p>
-          <div className="p-4 rounded-xl border border-border/80 bg-muted/20 flex flex-col gap-2.5 text-xs">
-            <div className="flex items-center gap-3">
-              <Badge variant="destructive" className="w-20 justify-center">
+          <div className="p-4 rounded-xl border border-border/80 bg-muted/20 flex flex-col gap-3 text-sm">
+            <div className="flex items-center gap-3.5">
+              <Badge variant="destructive" className="w-24 justify-center text-xs font-bold py-0.5">
                 BLOCK
               </Badge>
-              <span className="text-muted-foreground">
+              <span className="text-foreground/85">
                 Highest priority. Triggered by credential exposure or unacceptable interpersonal hostility.
               </span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3.5">
               <Badge
                 variant="outline"
-                className="w-20 justify-center text-orange-700 dark:text-orange-400 border-orange-700/30 bg-orange-500/10"
+                className="w-24 justify-center text-xs font-bold py-0.5 text-orange-700 dark:text-orange-400 border-orange-700/30 bg-orange-500/10"
               >
                 HOLD
               </Badge>
-              <span className="text-muted-foreground">
+              <span className="text-foreground/85">
                 Triggered when factual claims require human verification or model confidence is low.
               </span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3.5">
               <Badge
                 variant="outline"
-                className="w-20 justify-center text-amber-700 dark:text-amber-400 border-amber-700/30 bg-amber-500/10"
+                className="w-24 justify-center text-xs font-bold py-0.5 text-amber-700 dark:text-amber-400 border-amber-700/30 bg-amber-500/10"
               >
                 REWRITE
               </Badge>
-              <span className="text-muted-foreground">
+              <span className="text-foreground/85">
                 Triggered when clarity, value, intent alignment, or spam risk fail defined communication standards.
               </span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3.5">
               <Badge
                 variant="outline"
-                className="w-20 justify-center text-emerald-700 dark:text-emerald-400 border-emerald-700/30 bg-emerald-500/10"
+                className="w-24 justify-center text-xs font-bold py-0.5 text-emerald-700 dark:text-emerald-400 border-emerald-700/30 bg-emerald-500/10"
               >
                 SEND
               </Badge>
-              <span className="text-muted-foreground">
+              <span className="text-foreground/85">
                 The draft clears all quality and safety checks without triggering any warning threshold.
               </span>
             </div>
@@ -266,27 +266,27 @@ export default function MethodPage() {
         <section className="flex flex-col gap-4">
           <div>
             <h2 className="text-xl font-bold tracking-tight">4. Active policy thresholds</h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-base text-foreground/80 mt-1">
               Exact thresholds configured in <code>{POLICY_VERSION}</code> (Question pack:{" "}
               <code>{QUESTION_PACK_VERSION}</code>).
             </p>
           </div>
 
-          <div className="rounded-xl border border-border/80 overflow-hidden bg-card">
+          <div className="rounded-xl border border-border/80 overflow-hidden bg-card shadow-xs">
             <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left">
-                <thead className="bg-muted/40 border-b border-border/80 text-muted-foreground font-semibold">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-muted/40 border-b border-border/80 text-foreground/90 font-semibold">
                   <tr>
-                    <th scope="col" className="py-3 px-4">
+                    <th scope="col" className="py-3.5 px-4 text-sm font-semibold">
                       Signal
                     </th>
-                    <th scope="col" className="py-3 px-4">
+                    <th scope="col" className="py-3.5 px-4 text-sm font-semibold">
                       Condition
                     </th>
-                    <th scope="col" className="py-3 px-4">
+                    <th scope="col" className="py-3.5 px-4 text-sm font-semibold">
                       Verdict
                     </th>
-                    <th scope="col" className="py-3 px-4 hidden sm:table-cell">
+                    <th scope="col" className="py-3.5 px-4 text-sm font-semibold hidden sm:table-cell">
                       Trigger description
                     </th>
                   </tr>
@@ -294,9 +294,9 @@ export default function MethodPage() {
                 <tbody className="divide-y divide-border/60">
                   {thresholdRows.map(([signal, condition, verdict, desc]) => (
                     <tr key={signal} className="hover:bg-muted/20 transition-colors">
-                      <td className="py-2.5 px-4 font-medium text-foreground">{signal}</td>
-                      <td className="py-2.5 px-4 font-mono text-muted-foreground">{condition}</td>
-                      <td className="py-2.5 px-4">
+                      <td className="py-3.5 px-4 font-medium text-foreground">{signal}</td>
+                      <td className="py-3.5 px-4 font-mono text-muted-foreground">{condition}</td>
+                      <td className="py-3.5 px-4">
                         <span
                           className={`font-bold ${
                             verdict === "BLOCK"
@@ -309,7 +309,7 @@ export default function MethodPage() {
                           {verdict}
                         </span>
                       </td>
-                      <td className="py-2.5 px-4 text-muted-foreground hidden sm:table-cell">{desc}</td>
+                      <td className="py-3.5 px-4 text-muted-foreground hidden sm:table-cell">{desc}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -324,16 +324,16 @@ export default function MethodPage() {
             <HugeiconsIcon icon={LockIcon} strokeWidth={2} className="size-5 text-foreground" />
             <h2 className="text-xl font-bold tracking-tight">5. Privacy and data retention</h2>
           </div>
-          <Card className="border-border/70 bg-card">
-            <CardContent className="pt-5 text-sm text-muted-foreground flex flex-col gap-3">
+          <Card className="border-border/70 bg-card shadow-xs">
+            <CardContent className="pt-5 text-base text-foreground/80 flex flex-col gap-3.5 leading-relaxed">
               <p>
-                <strong>Zero retention in HOLD:</strong> HOLD operates statelessly. Drafts and evaluations are handled
-                entirely in-memory and are never stored in databases, caches, or logs.
+                <strong className="text-foreground">Zero retention in HOLD:</strong> HOLD operates statelessly. Drafts
+                and evaluations are handled entirely in-memory and are never stored in databases, caches, or logs.
               </p>
               <p>
-                <strong>Provider transit:</strong> Evaluations are processed securely through the TypeSafe Jev API.
-                Under TypeSafe&apos;s API policies, data sent for inference is not retained for model training. Review
-                TypeSafe&apos;s current documentation for enterprise guarantees.
+                <strong className="text-foreground">Provider transit:</strong> Evaluations are processed securely
+                through the TypeSafe Jev API. Under TypeSafe&apos;s API policies, data sent for inference is not
+                retained for model training. Review TypeSafe&apos;s current documentation for enterprise guarantees.
               </p>
             </CardContent>
           </Card>
@@ -345,49 +345,49 @@ export default function MethodPage() {
             <HugeiconsIcon icon={InformationCircleIcon} strokeWidth={2} className="size-5 text-foreground" />
             <h2 className="text-xl font-bold tracking-tight">6. Important limitations</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-muted-foreground">
-            <div className="p-3.5 rounded-xl border border-border/60 bg-muted/20 flex gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-sm text-foreground/80">
+            <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex gap-3">
               <HugeiconsIcon
                 icon={CheckmarkCircle02Icon}
                 strokeWidth={2}
-                className="size-4 shrink-0 text-muted-foreground"
+                className="size-5 shrink-0 text-muted-foreground mt-0.5"
               />
-              <span>
-                <strong>Not a fact checker:</strong> A verification signal highlights statements needing human review;
-                it cannot verify external claims itself.
+              <span className="leading-relaxed">
+                <strong className="text-foreground">Not a fact checker:</strong> A verification signal highlights
+                statements needing human review; it cannot verify external claims itself.
               </span>
             </div>
-            <div className="p-3.5 rounded-xl border border-border/60 bg-muted/20 flex gap-2.5">
+            <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex gap-3">
               <HugeiconsIcon
                 icon={CheckmarkCircle02Icon}
                 strokeWidth={2}
-                className="size-4 shrink-0 text-muted-foreground"
+                className="size-5 shrink-0 text-muted-foreground mt-0.5"
               />
-              <span>
-                <strong>Not legal or compliance advice:</strong> HOLD does not replace legal review, compliance
-                screening, or human HR judgment.
+              <span className="leading-relaxed">
+                <strong className="text-foreground">Not legal or compliance advice:</strong> HOLD does not replace legal
+                review, compliance screening, or human HR judgment.
               </span>
             </div>
-            <div className="p-3.5 rounded-xl border border-border/60 bg-muted/20 flex gap-2.5">
+            <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex gap-3">
               <HugeiconsIcon
                 icon={CheckmarkCircle02Icon}
                 strokeWidth={2}
-                className="size-4 shrink-0 text-muted-foreground"
+                className="size-5 shrink-0 text-muted-foreground mt-0.5"
               />
-              <span>
-                <strong>Not an AI text detector:</strong> HOLD evaluates the communication quality and risk of text, not
-                whether a human or LLM generated it.
+              <span className="leading-relaxed">
+                <strong className="text-foreground">Not an AI text detector:</strong> HOLD evaluates the communication
+                quality and risk of text, not whether a human or LLM generated it.
               </span>
             </div>
-            <div className="p-3.5 rounded-xl border border-border/60 bg-muted/20 flex gap-2.5">
+            <div className="p-4 rounded-xl border border-border/60 bg-muted/20 flex gap-3">
               <HugeiconsIcon
                 icon={CheckmarkCircle02Icon}
                 strokeWidth={2}
-                className="size-4 shrink-0 text-muted-foreground"
+                className="size-5 shrink-0 text-muted-foreground mt-0.5"
               />
-              <span>
-                <strong>Experimental thresholds:</strong> Thresholds should be calibrated to your organization&apos;s
-                risk tolerance before production deployment.
+              <span className="leading-relaxed">
+                <strong className="text-foreground">Experimental thresholds:</strong> Thresholds should be calibrated to
+                your organization&apos;s risk tolerance before production deployment.
               </span>
             </div>
           </div>
@@ -396,8 +396,8 @@ export default function MethodPage() {
         {/* Section 7: OSS Contribution Link */}
         <section className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-xl border border-border/80 bg-muted/30">
           <div className="flex flex-col gap-1">
-            <span className="font-semibold text-sm text-foreground">Open source & community</span>
-            <span className="text-xs text-muted-foreground">
+            <span className="font-semibold text-base text-foreground">Open source & community</span>
+            <span className="text-sm text-foreground/80">
               HOLD is licensed under Apache 2.0. Contributions, question-pack improvements, and policy tuning are
               welcome.
             </span>
@@ -406,10 +406,14 @@ export default function MethodPage() {
             href="https://github.com"
             target="_blank"
             rel="noreferrer"
-            className={buttonVariants({ variant: "outline", size: "sm", className: "h-9 shrink-0 gap-1.5" })}
+            className={buttonVariants({
+              variant: "outline",
+              size: "sm",
+              className: "h-10 px-4 text-sm shrink-0 gap-2",
+            })}
           >
             <span>GitHub Repository</span>
-            <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2} className="size-3.5" />
+            <HugeiconsIcon icon={ArrowUpRight01Icon} strokeWidth={2} className="size-4" />
           </a>
         </section>
       </main>
