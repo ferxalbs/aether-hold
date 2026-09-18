@@ -7,7 +7,7 @@ async function waitForHydration(page: Page) {
 test.describe("HOLD critical flow", () => {
   test("shows the judge surface and sends a clear draft once", async ({ page }, testInfo) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: /AI writes/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Should this be sent\?/i })).toBeVisible();
     await expect(page.getByLabel("Your draft Required")).toBeVisible();
     await waitForHydration(page);
     await page.screenshot({ path: testInfo.outputPath("hold-initial-desktop.png"), fullPage: true });
@@ -37,17 +37,17 @@ test.describe("HOLD critical flow", () => {
     await page.getByRole("button", { name: /Judge before sending/i }).click();
     await expect(page.getByRole("heading", { name: "REWRITE" })).toBeVisible();
 
-    await page.getByRole("button", { name: /Try another/i }).click();
-    await page.getByRole("button", { name: /Frustrated support reply/i }).click();
+    await page.getByRole("button", { name: /(Judge another|Try another)/i }).click();
+    await page.getByRole("button", { name: /(Hostile|Frustrated) support reply/i }).click();
     await page.getByRole("button", { name: /Judge before sending/i }).click();
     await expect(page.getByRole("heading", { name: "BLOCK" })).toBeVisible();
 
-    await page.getByRole("button", { name: /Try another/i }).click();
+    await page.getByRole("button", { name: /(Judge another|Try another)/i }).click();
     await page.getByRole("button", { name: /Vague social post/i }).click();
     await page.getByRole("button", { name: /Judge before sending/i }).click();
     await expect(page.getByRole("heading", { name: "REWRITE" })).toBeVisible();
 
-    await page.getByRole("button", { name: /Try another/i }).click();
+    await page.getByRole("button", { name: /(Judge another|Try another)/i }).click();
     await page
       .getByLabel("Your draft Required")
       .fill("According to the latest research, this change will save 40% of the team's time.");
@@ -59,7 +59,7 @@ test.describe("HOLD critical flow", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     await waitForHydration(page);
-    await expect(page.getByRole("heading", { name: /AI writes/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Should this be sent\?/i })).toBeVisible();
     await page.screenshot({ path: testInfo.outputPath("hold-initial-mobile.png"), fullPage: true });
     const animationDuration = await page
       .locator(".hero h1")
@@ -87,5 +87,30 @@ test.describe("HOLD critical flow", () => {
       "HOLD could not complete this judgment. Please try again.",
     );
     await expect(page.getByText(/TypeSafeError|stack trace/i)).toHaveCount(0);
+  });
+
+  test("evaluates using Cmd/Ctrl+Enter keyboard shortcut", async ({ page }) => {
+    await page.goto("/");
+    await waitForHydration(page);
+    await page.getByLabel("Your draft Required").fill("Please review this document before the meeting.");
+    await page.keyboard.press("Meta+Enter");
+    await expect(page.getByRole("heading", { name: "SEND" })).toBeVisible();
+  });
+
+  test("fits completely within a 1440x900 viewport without scrolling to reach primary action", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/");
+    await waitForHydration(page);
+
+    // Hero must be fully visible and not clipped
+    const heroBox = await page.getByRole("heading", { name: /Should this be sent\?/i }).boundingBox();
+    expect(heroBox).not.toBeNull();
+    expect(heroBox?.y).toBeGreaterThanOrEqual(50);
+    expect(heroBox?.y).toBeLessThan(350);
+
+    // The primary action button must be visible within the initial 900px viewport without scrolling
+    const buttonBox = await page.getByRole("button", { name: /Judge before sending/i }).boundingBox();
+    expect(buttonBox).not.toBeNull();
+    expect((buttonBox?.y ?? 0) + (buttonBox?.height ?? 0)).toBeLessThan(900);
   });
 });
