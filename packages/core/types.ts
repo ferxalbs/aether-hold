@@ -113,7 +113,12 @@ export type EvaluationResponse = {
   experimental: true;
 };
 
-export type EvaluationErrorCode = "INVALID_INPUT" | "RATE_LIMITED" | "TIMEOUT" | "EVALUATION_FAILED";
+export type EvaluationErrorCode =
+  | "INVALID_INPUT"
+  | "RATE_LIMITED"
+  | "TIMEOUT"
+  | "EVALUATION_FAILED"
+  | "provider_not_configured";
 
 export type EvaluationErrorResponse = {
   error: EvaluationErrorCode;

@@ -12,6 +12,7 @@ export default defineConfig({
   },
   webServer: {
     command: "bun run dev",
+    env: { HOLD_PROVIDER: "fake", HOLD_FAKE_FAILURE: "0" },
     url: "http://localhost:3000",
     reuseExistingServer: true,
     timeout: 120_000,

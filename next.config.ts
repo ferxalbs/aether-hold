@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import { validateProviderConfiguration } from "./lib/provider-config";
+
+validateProviderConfiguration();
 
 const nextConfig: NextConfig = {
   reactCompiler: true,

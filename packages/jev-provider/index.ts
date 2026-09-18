@@ -1,4 +1,5 @@
 import { choice, noul, type Questions, score, TypeSafeClient } from "@typesafe-ai/sdk";
+import { ProviderConfigurationError, ProviderNotConfiguredError, resolveProviderConfig } from "@/lib/provider-config";
 import type {
   ChoiceSignal,
   HoldInput,
@@ -85,6 +86,12 @@ export class TypeSafeJudgmentProvider implements JudgmentProvider {
   private readonly client: TypeSafeClient;
 
   constructor() {
+    const config = resolveProviderConfig();
+    if (config.mode !== "typesafe") {
+      throw new ProviderConfigurationError("The TypeSafe provider cannot be constructed while fake mode is selected.");
+    }
+    if (!config.hasApiKey) throw new ProviderNotConfiguredError();
+
     this.client = new TypeSafeClient({
       apiKey: process.env.TYPESAFE_API_KEY,
       defaultModel: process.env.TYPESAFE_DEFAULT_MODEL || "jev-latest",
@@ -141,11 +148,10 @@ export class TypeSafeJudgmentProvider implements JudgmentProvider {
 }
 
 export function createProvider(): { provider: JudgmentProvider; mode: "fake" | "typesafe" } {
-  const requestedMode = process.env.HOLD_PROVIDER?.toLowerCase();
-  const useTypeSafe = requestedMode === "typesafe" || (!requestedMode && Boolean(process.env.TYPESAFE_API_KEY));
+  const config = resolveProviderConfig();
 
-  if (useTypeSafe) return { provider: new TypeSafeJudgmentProvider(), mode: "typesafe" };
-  return { provider: new FakeJudgmentProvider(), mode: "fake" };
+  if (config.mode === "fake") return { provider: new FakeJudgmentProvider(), mode: "fake" };
+  return { provider: new TypeSafeJudgmentProvider(), mode: "typesafe" };
 }
 
 export function createPackForInput(input: HoldInput): QuestionPack {

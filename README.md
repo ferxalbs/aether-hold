@@ -11,7 +11,7 @@ HOLD is an open-source, pre-send judgment layer powered by TypeSafe Jev. Paste a
 - Exactly three contexts: social posts, emails, and support replies.
 - One TypeSafe Jev request per evaluation, with atomic Choice, Score, and Noul questions evaluated in parallel.
 - A deterministic, versioned policy in ordinary TypeScript with explicit threshold reason codes.
-- Fake-provider mode for local development and automated tests when no API key is present.
+- Explicit fake-provider mode for local development and automated tests only (`HOLD_PROVIDER=fake`).
 - A draft-free verdict card that downloads as PNG (with SVG fallback).
 - A transparency page at `/method` describing the primitives, thresholds, privacy behavior, and limitations.
 
@@ -39,7 +39,7 @@ cp .env.example .env.local
 bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). With no `TYPESAFE_API_KEY`, the app uses the deterministic fake provider. The examples are designed to reach `REWRITE`, `BLOCK`, and `HOLD`; a clear professional draft reaches `SEND`.
+Open [http://localhost:3000](http://localhost:3000). For local UI work without a key, set `HOLD_PROVIDER=fake`; the result is visibly labeled `Development simulation`. Without that explicit setting, a missing key returns a safe `503 provider_not_configured` response. The examples are designed to reach `REWRITE`, `BLOCK`, and `HOLD`; a clear professional draft reaches `SEND`.
 
 ### Environment variables
 
@@ -63,6 +63,8 @@ HOLD_RATE_LIMIT_SALT=long-random-secret
 
 If the Upstash variables are absent, local evaluation continues to work. A public production deployment should configure rate limiting before exposure. The rate limiter is a small REST pipeline using `INCR` and `EXPIRE`; it fails closed if a configured service is unavailable.
 
+`HOLD_PROVIDER=fake` is rejected when `NODE_ENV=production` or `VERCEL_ENV=production`, including during the Next.js build. Production never falls back to fixture judgments; if `TYPESAFE_API_KEY` is missing, the evaluation route returns `503 provider_not_configured`.
+
 Fake-mode controls are useful for browser checks:
 
 ```bash
@@ -82,9 +84,12 @@ bun run typecheck
 bun run lint
 bun run lint:biome
 bun test
+bun run test:live-jev # opt-in; requires TYPESAFE_API_KEY
 bun run build
 bun run test:e2e
 ```
+
+The live suite evaluates seven synthetic smoke drafts and all 30 calibration drafts with one Jev request per evaluation. It writes model outputs and request metadata to the ignored `calibration/live-jev-smoke.latest.json`; human labels remain in `calibration/hold-calibration-v1.json`.
 
 Playwright starts the local dev server automatically. Install a browser once if needed:
 

@@ -23,6 +23,8 @@ test.describe("HOLD critical flow", () => {
     expect(response.request().method()).toBe("POST");
     await expect(page.getByRole("heading", { name: "SEND" })).toBeVisible();
     await expect(page.getByText("No threshold was triggered.")).toBeVisible();
+    await expect(page.getByTestId("development-simulation")).toHaveText("Development simulation");
+    await expect(page.getByText("Usage")).toBeVisible();
     await page.screenshot({ path: testInfo.outputPath("hold-send-desktop.png"), fullPage: true });
     const downloadPromise = page.waitForEvent("download");
     await page.getByRole("button", { name: /Download card/i }).click();
@@ -87,6 +89,47 @@ test.describe("HOLD critical flow", () => {
       "HOLD could not complete this judgment. Please try again.",
     );
     await expect(page.getByText(/TypeSafeError|stack trace/i)).toHaveCount(0);
+  });
+
+  test("renders real-provider model, latency, usage, and cost without a simulation badge", async ({ page }) => {
+    await page.route("**/api/evaluate", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          verdict: "SEND",
+          reasons: [],
+          reasonLabels: [],
+          signals: [
+            {
+              id: "clarity",
+              label: "Clarity",
+              value: 1,
+              displayValue: "100%",
+              confidence: 0.98,
+            },
+          ],
+          policyVersion: "hold-policy-1.0.0-experimental",
+          questionPackVersion: "hold-questions-1.0.0",
+          model: "jev-latest",
+          latencyMs: 123,
+          estimatedCostUsd: 0.0018,
+          usage: { inputTokens: 42_000, outputTokens: 700 },
+          providerMode: "typesafe",
+          experimental: true,
+        }),
+      }),
+    );
+    await page.goto("/");
+    await waitForHydration(page);
+    await page.getByLabel("Your draft Required").fill("Please review this clear professional draft.");
+    await page.getByRole("button", { name: /Judge before sending/i }).click();
+    await expect(page.getByRole("heading", { name: "SEND" })).toBeVisible();
+    await expect(page.getByText("jev-latest")).toBeVisible();
+    await expect(page.getByText("123 ms")).toBeVisible();
+    await expect(page.getByText("42,000 in · 700 out")).toBeVisible();
+    await expect(page.getByText("$0.0018 est.")).toBeVisible();
+    await expect(page.getByTestId("development-simulation")).toHaveCount(0);
   });
 
   test("evaluates using Cmd/Ctrl+Enter keyboard shortcut", async ({ page }) => {

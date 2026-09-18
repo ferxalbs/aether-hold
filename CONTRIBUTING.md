@@ -11,7 +11,7 @@ bun run lint
 bun run build
 ```
 
-Use fake-provider mode for tests and local UI work. Never commit an API key or a real draft in a fixture.
+Use fake-provider mode for tests and local UI work by explicitly setting `HOLD_PROVIDER=fake`; never rely on a missing key to select it. Never commit an API key or a real draft in a fixture.
 
 ## Adding or changing a question pack
 

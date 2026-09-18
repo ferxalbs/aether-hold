@@ -1,4 +1,5 @@
 import { EvaluationTimeoutError, evaluateHold, MAX_REQUEST_BYTES } from "@/lib/evaluation";
+import { ProviderNotConfiguredError, resolveProviderConfig } from "@/lib/provider-config";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { type EvaluationErrorResponse, holdInputSchema } from "@/packages/core";
 
@@ -73,6 +74,11 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
+    const providerConfig = resolveProviderConfig();
+    if (providerConfig.mode === "typesafe" && !providerConfig.hasApiKey) {
+      throw new ProviderNotConfiguredError();
+    }
+
     const rateLimit = await checkRateLimit(request);
     if (!rateLimit.allowed) {
       return errorResponse(
@@ -88,6 +94,17 @@ export async function POST(request: Request): Promise<Response> {
     const response = await evaluateHold(parsed.data);
     return json(response, 200, rateLimit.enabled ? { "X-RateLimit-Remaining": String(rateLimit.remaining) } : {});
   } catch (error) {
+    if (error instanceof ProviderNotConfiguredError) {
+      return errorResponse(
+        {
+          error: "provider_not_configured",
+          message: "HOLD is not configured for a real Jev provider. Please add TYPESAFE_API_KEY and try again.",
+          retryable: false,
+        },
+        503,
+      );
+    }
+
     if (error instanceof EvaluationTimeoutError) {
       return errorResponse(
         { error: "TIMEOUT", message: "The judgment took too long. Please try again.", retryable: true },

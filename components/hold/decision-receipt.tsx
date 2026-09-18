@@ -1,9 +1,11 @@
 import { Badge } from "@/components/ui/badge";
+import type { ProviderUsage } from "@/packages/core";
 
 interface DecisionReceiptProps {
   latencyMs: number;
   estimatedCostUsd: number | null;
   model: string;
+  usage: ProviderUsage | null;
   policyVersion: string;
   questionPackVersion: string;
 }
@@ -18,6 +20,7 @@ export function DecisionReceipt({
   latencyMs,
   estimatedCostUsd,
   model,
+  usage,
   policyVersion,
   questionPackVersion,
 }: DecisionReceiptProps) {
@@ -29,7 +32,7 @@ export function DecisionReceipt({
           1 Jev request
         </Badge>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-muted-foreground">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-muted-foreground">
         <div>
           <span className="block text-[10px] uppercase tracking-wider text-muted-foreground/70">Latency</span>
           <span className="font-medium text-foreground tabular-nums">{latencyMs} ms</span>
@@ -42,6 +45,14 @@ export function DecisionReceipt({
           <span className="block text-[10px] uppercase tracking-wider text-muted-foreground/70">Model</span>
           <span className="font-medium text-foreground truncate block" title={model}>
             {model}
+          </span>
+        </div>
+        <div>
+          <span className="block text-[10px] uppercase tracking-wider text-muted-foreground/70">Usage</span>
+          <span className="font-medium text-foreground tabular-nums" title="Input and output tokens">
+            {usage
+              ? `${usage.inputTokens.toLocaleString()} in · ${usage.outputTokens.toLocaleString()} out`
+              : "Not available"}
           </span>
         </div>
         <div>

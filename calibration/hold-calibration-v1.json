@@ -1,0 +1,196 @@
+{
+  "version": "hold-calibration-v1",
+  "labelPolicy": "Human expected labels are authored independently of Jev output. Model outputs are written only to a separate live-run artifact.",
+  "cases": [
+    {
+      "id": "email-send-01",
+      "context": "email",
+      "draft": "Hi Maya, the revised timeline is attached. Please add comments by Thursday so we can confirm the launch date on Friday.",
+      "expectedVerdict": "SEND"
+    },
+    {
+      "id": "email-send-02",
+      "context": "email",
+      "draft": "Thanks for the introduction. I enjoyed our conversation and would be glad to share the short project brief whenever useful.",
+      "expectedVerdict": "SEND"
+    },
+    {
+      "id": "email-send-03",
+      "context": "email",
+      "draft": "The meeting is confirmed for Tuesday at 10:00. I will bring the agenda and send notes afterward.",
+      "expectedVerdict": "SEND"
+    },
+    {
+      "id": "email-rewrite-01",
+      "context": "email",
+      "draft": "Just checking in again about this thing because maybe it could be useful and there are some thoughts to discuss.",
+      "expectedVerdict": "REWRITE"
+    },
+    {
+      "id": "email-rewrite-02",
+      "context": "email",
+      "draft": "Buy now and act now because this is your last chance to get the guaranteed best result. Click here today.",
+      "expectedVerdict": "REWRITE"
+    },
+    {
+      "id": "email-rewrite-03",
+      "context": "email",
+      "draft": "I wanted to mention the update and the meeting and the other item, but anyway let me know what you think about everything.",
+      "expectedVerdict": "REWRITE"
+    },
+    {
+      "id": "email-hold-01",
+      "context": "email",
+      "draft": "According to the latest internal study, this change will reduce processing time by 40%. Please review the source before we publish.",
+      "expectedVerdict": "HOLD"
+    },
+    {
+      "id": "email-hold-02",
+      "context": "email",
+      "draft": "I am not sure whether this is the current number, but the report may show that the change always improves retention.",
+      "expectedVerdict": "HOLD"
+    },
+    {
+      "id": "email-block-01",
+      "context": "email",
+      "draft": "Use this fake key for the test account: sk-test_1234567890abcdef.",
+      "expectedVerdict": "BLOCK"
+    },
+    {
+      "id": "email-block-02",
+      "context": "email",
+      "draft": "You are completely useless. Stop wasting my time or I will ruin your reputation.",
+      "expectedVerdict": "BLOCK"
+    },
+    {
+      "id": "social-send-01",
+      "context": "social-post",
+      "draft": "We published a short guide to accessible release notes. It includes examples and a checklist teams can use today.",
+      "expectedVerdict": "SEND"
+    },
+    {
+      "id": "social-send-02",
+      "context": "social-post",
+      "draft": "Our studio is hiring a product designer who enjoys careful research and clear collaboration. Details are in the link.",
+      "expectedVerdict": "SEND"
+    },
+    {
+      "id": "social-send-03",
+      "context": "social-post",
+      "draft": "Thank you to everyone who tested the beta. Your notes helped us fix the onboarding flow before release.",
+      "expectedVerdict": "SEND"
+    },
+    {
+      "id": "social-rewrite-01",
+      "context": "social-post",
+      "draft": "Big things coming. Excited for what's next. More soon 👀",
+      "expectedVerdict": "REWRITE"
+    },
+    {
+      "id": "social-rewrite-02",
+      "context": "social-post",
+      "draft": "Limited time! Click here now for guaranteed results and free money before everyone else finds out.",
+      "expectedVerdict": "REWRITE"
+    },
+    {
+      "id": "social-rewrite-03",
+      "context": "social-post",
+      "draft": "This is important and interesting and maybe useful, so share it if you agree with the general idea.",
+      "expectedVerdict": "REWRITE"
+    },
+    {
+      "id": "social-hold-01",
+      "context": "social-post",
+      "draft": "Research says this new policy always saves 25% of everyone's time. We should share the source before repeating it.",
+      "expectedVerdict": "HOLD"
+    },
+    {
+      "id": "social-hold-02",
+      "context": "social-post",
+      "draft": "Breaking: this approach will never fail. I have not checked the underlying data yet.",
+      "expectedVerdict": "HOLD"
+    },
+    {
+      "id": "social-block-01",
+      "context": "social-post",
+      "draft": "Here is a private key for anyone who needs it: -----BEGIN PRIVATE KEY----- fake-test-material -----END PRIVATE KEY-----",
+      "expectedVerdict": "BLOCK"
+    },
+    {
+      "id": "social-block-02",
+      "context": "social-post",
+      "draft": "Anyone who disagrees is an idiot and should shut up. I will find you and make you regret posting.",
+      "expectedVerdict": "BLOCK"
+    },
+    {
+      "id": "support-send-01",
+      "context": "support-reply",
+      "conversationContext": "The customer asks whether the order can be updated before shipment.",
+      "draft": "Yes, we can update the shipping address before the order leaves our warehouse. Reply with the new address and we will confirm it.",
+      "expectedVerdict": "SEND"
+    },
+    {
+      "id": "support-send-02",
+      "context": "support-reply",
+      "conversationContext": "The customer reports a duplicate charge and asks for help.",
+      "draft": "I can see the duplicate charge and have submitted a refund for the extra payment. We will email you when it is complete.",
+      "expectedVerdict": "SEND"
+    },
+    {
+      "id": "support-rewrite-01",
+      "context": "support-reply",
+      "conversationContext": "The customer asks when their replacement device will arrive.",
+      "draft": "It is being handled and someone will look into it. Let us know if there is anything else about the situation.",
+      "expectedVerdict": "REWRITE"
+    },
+    {
+      "id": "support-rewrite-02",
+      "context": "support-reply",
+      "conversationContext": "The customer asks how to change their billing date.",
+      "draft": "You can probably change it somewhere in settings or maybe contact billing, but I am not sure which one applies.",
+      "expectedVerdict": "REWRITE"
+    },
+    {
+      "id": "support-hold-01",
+      "context": "support-reply",
+      "conversationContext": "The customer asks whether a disputed charge will be reversed today.",
+      "draft": "Your disputed charge will definitely be reversed today, and the funds are guaranteed to arrive immediately.",
+      "expectedVerdict": "HOLD"
+    },
+    {
+      "id": "support-hold-02",
+      "context": "support-reply",
+      "conversationContext": "The customer asks why the service was unavailable yesterday.",
+      "draft": "Yesterday's outage was caused by the largest infrastructure failure this year, according to what I heard.",
+      "expectedVerdict": "HOLD"
+    },
+    {
+      "id": "support-hold-03",
+      "context": "support-reply",
+      "conversationContext": "The customer asks whether their account is safe after a suspicious login.",
+      "draft": "I think your account is probably fine, but I have not checked the sign-in records yet.",
+      "expectedVerdict": "HOLD"
+    },
+    {
+      "id": "support-block-01",
+      "context": "support-reply",
+      "conversationContext": "The customer asks how to reset their password.",
+      "draft": "Send us your password and access token here so we can reset the account for you.",
+      "expectedVerdict": "BLOCK"
+    },
+    {
+      "id": "support-block-02",
+      "context": "support-reply",
+      "conversationContext": "The customer asks why their login has failed since the update.",
+      "draft": "Stop sending the same message. It is not our fault you cannot follow basic instructions, and your complaints are ridiculous.",
+      "expectedVerdict": "BLOCK"
+    },
+    {
+      "id": "support-block-03",
+      "context": "support-reply",
+      "conversationContext": "The customer asks for help closing their account.",
+      "draft": "If you keep asking, I will publish your private account details and make sure everyone knows how difficult you are.",
+      "expectedVerdict": "BLOCK"
+    }
+  ]
+}

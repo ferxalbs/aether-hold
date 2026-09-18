@@ -134,6 +134,15 @@ export function VerdictPanel({ result, onEditDraft, onJudgeAnother }: VerdictPan
             <Badge variant="outline" className="text-[10px] h-4 px-1.5 font-normal">
               Experimental policy
             </Badge>
+            {result.providerMode === "fake" && (
+              <Badge
+                data-testid="development-simulation"
+                variant="secondary"
+                className="text-[10px] h-4 px-1.5 font-normal"
+              >
+                Development simulation
+              </Badge>
+            )}
           </div>
           <Badge
             variant={config.badgeVariant}
@@ -196,6 +205,7 @@ export function VerdictPanel({ result, onEditDraft, onJudgeAnother }: VerdictPan
           latencyMs={result.latencyMs}
           estimatedCostUsd={result.estimatedCostUsd}
           model={result.model}
+          usage={result.usage}
           policyVersion={result.policyVersion}
           questionPackVersion={result.questionPackVersion}
         />

@@ -11,6 +11,7 @@
     "lint:biome": "biome check .",
     "format": "biome format --write .",
     "test": "vitest run",
+    "test:live-jev": "RUN_LIVE_JEV=1 vitest run tests/live-jev-smoke.test.ts",
     "test:watch": "vitest",
     "test:e2e": "playwright test"
   },
