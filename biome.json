@@ -1,7 +1,15 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
   "files": {
-    "includes": ["**", "!node_modules", "!.next", "!coverage", "!public", "!test-results"]
+    "includes": [
+      "**",
+      "!node_modules",
+      "!.next",
+      "!coverage",
+      "!public",
+      "!test-results",
+      "!calibration/live-jev-smoke.latest.json"
+    ]
   },
   "formatter": {
     "enabled": true,

@@ -34,14 +34,16 @@ export async function withEvaluationTimeout<T>(promise: Promise<T>, timeoutMs = 
 
 export async function evaluateHold(
   input: HoldInput,
-  dependencies: { provider?: JudgmentProvider; mode?: "fake" | "typesafe" } = {},
+  dependencies: { provider?: JudgmentProvider; mode?: "fake" | "typesafe"; signal?: AbortSignal } = {},
 ): Promise<EvaluationResponse> {
   const started = performance.now();
   const pack = createPackForInput(input);
   const selected = dependencies.provider
     ? { provider: dependencies.provider, mode: dependencies.mode ?? "fake" }
     : createProvider();
-  const result: JudgmentResult = await withEvaluationTimeout(selected.provider.evaluate(input, pack));
+  const result: JudgmentResult = await withEvaluationTimeout(
+    selected.provider.evaluate(input, pack, dependencies.signal),
+  );
   const decision = evaluatePolicy(input, result);
   const latencyMs = Math.max(1, Math.round(performance.now() - started));
 
@@ -57,6 +59,7 @@ export async function evaluateHold(
     estimatedCostUsd: estimateCostUsd(result.usage, selected.mode),
     usage: result.usage ?? null,
     providerMode: selected.mode,
+    evidenceStatus: "NOT_NEEDED",
     experimental: true,
   };
 }

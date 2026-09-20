@@ -1,27 +1,35 @@
-import type { HoldInput, JudgmentResult, NormalizedSignal, PolicyDecision, ReasonCode } from "@/packages/core";
-import { clamp01 } from "@/packages/core";
+import type {
+  HoldInput,
+  JudgmentResult,
+  NormalizedSignal,
+  PolicyDecision,
+  ReasonCode,
+  SignalId,
+} from "@/packages/core";
+import { clamp01, REASON_SIGNAL_MAP, SIGNAL_METADATA } from "@/packages/core";
 import { POLICY_THRESHOLDS, POLICY_VERSION } from "./config";
 
 const likelySecretPattern =
-  /(sk-[a-z0-9_-]{12,}|(?:gh[pousr]|xox[baprs])_[a-z0-9_-]{16,}|api[_ -]?key\s*[:=]|access[_ -]?token\s*[:=]|private key|password\s*[:=]|-----begin [a-z0-9 ]*private key-----)/i;
+  /(sk-[a-z0-9_-]{12,}|(?:gh[pousr]|xox[baprs])_[a-z0-9_-]{16,}|api[_ -]?key\s*[:=]|access[_ -]?token\s*[:=]|private key|password\s*[:=]|-----begin [a-z0-9 ]*private key-----|\b(?:send|share|paste|provide|post|enter|give)\b[\s\S]{0,80}\b(?:password|access token|api key|secret|token)\b)/i;
 
 function scoreValue(score: number, maxScore: number): number {
   return clamp01(maxScore > 0 ? score / maxScore : 0);
 }
 
 function signal(
-  id: string,
-  label: string,
+  id: SignalId,
   value: number,
   displayValue: string,
   confidence?: number,
   selected?: string,
 ): NormalizedSignal {
+  const metadata = SIGNAL_METADATA[id];
   return {
     id,
-    label,
+    label: metadata.label,
     value: clamp01(value),
     displayValue,
+    direction: metadata.direction,
     ...(confidence === undefined ? {} : { confidence: clamp01(confidence) }),
     ...(selected === undefined ? {} : { selected }),
   };
@@ -30,16 +38,7 @@ function signal(
 export function normalizeSignals(result: JudgmentResult): NormalizedSignal[] {
   const signals: NormalizedSignal[] = [
     signal(
-      "recommendedAction",
-      "Recommended action",
-      result.recommendedAction.confidence,
-      result.recommendedAction.choice,
-      result.recommendedAction.confidence,
-      result.recommendedAction.choice,
-    ),
-    signal(
       "perceivedIntent",
-      "Perceived intent",
       result.perceivedIntent.confidence,
       result.perceivedIntent.choice,
       result.perceivedIntent.confidence,
@@ -47,48 +46,52 @@ export function normalizeSignals(result: JudgmentResult): NormalizedSignal[] {
     ),
     signal(
       "clarity",
-      "Clarity",
       scoreValue(result.clarity.score, result.clarity.maxScore),
       `${Math.round(scoreValue(result.clarity.score, result.clarity.maxScore) * 100)}%`,
       result.clarity.confidence,
     ),
     signal(
       "recipientValue",
-      "Recipient value",
       scoreValue(result.recipientValue.score, result.recipientValue.maxScore),
       `${Math.round(scoreValue(result.recipientValue.score, result.recipientValue.maxScore) * 100)}%`,
       result.recipientValue.confidence,
     ),
     signal(
       "tone",
-      "Tone",
       scoreValue(result.tone.score, result.tone.maxScore),
-      `${Math.round(scoreValue(result.tone.score, result.tone.maxScore) * 100)}%`,
+      result.tone.score >= 2 ? "Aggressive or abusive" : result.tone.score >= 1 ? "Tense" : "Calm",
       result.tone.confidence,
     ),
     signal(
       "secretExposure",
-      "Secret exposure",
       result.secretExposure.probability,
       `${Math.round(clamp01(result.secretExposure.probability) * 100)}% likely`,
     ),
     signal(
       "hostility",
-      "Hostility",
       result.hostility.probability,
       `${Math.round(clamp01(result.hostility.probability) * 100)}% likely`,
     ),
     signal(
       "spamRisk",
-      "Spam risk",
       result.spamRisk.probability,
       `${Math.round(clamp01(result.spamRisk.probability) * 100)}% likely`,
     ),
     signal(
       "needsVerification",
-      "Needs verification",
       result.needsVerification.probability,
       `${Math.round(clamp01(result.needsVerification.probability) * 100)}% likely`,
+    ),
+    signal(
+      "containsCheckableClaim",
+      result.containsCheckableClaim.probability,
+      `${Math.round(clamp01(result.containsCheckableClaim.probability) * 100)}% likely`,
+    ),
+    signal(
+      "claimConsequence",
+      scoreValue(result.claimConsequence.score, result.claimConsequence.maxScore),
+      `${Math.round(scoreValue(result.claimConsequence.score, result.claimConsequence.maxScore) * 100)}% consequence`,
+      result.claimConsequence.confidence,
     ),
   ];
 
@@ -96,7 +99,6 @@ export function normalizeSignals(result: JudgmentResult): NormalizedSignal[] {
     signals.push(
       signal(
         "addressesRequest",
-        "Addresses request",
         result.addressesRequest.probability,
         `${Math.round(clamp01(result.addressesRequest.probability) * 100)}% likely`,
       ),
@@ -107,7 +109,6 @@ export function normalizeSignals(result: JudgmentResult): NormalizedSignal[] {
     signals.push(
       signal(
         "intentAlignment",
-        "Intent alignment",
         result.intentAlignment.probability,
         `${Math.round(clamp01(result.intentAlignment.probability) * 100)}% likely`,
       ),
@@ -121,10 +122,22 @@ function pushReason(reasons: ReasonCode[], reason: ReasonCode): void {
   if (!reasons.includes(reason)) reasons.push(reason);
 }
 
+function setVerdict(current: PolicyDecision["verdict"], next: PolicyDecision["verdict"]): PolicyDecision["verdict"] {
+  const priority = { SEND: 0, REWRITE: 1, HOLD: 2, BLOCK: 3 } as const;
+  return priority[next] > priority[current] ? next : current;
+}
+
+export function signalForReason(reason: ReasonCode): SignalId | null {
+  return REASON_SIGNAL_MAP[reason];
+}
+
 export function evaluatePolicy(input: HoldInput, result: JudgmentResult): PolicyDecision {
   const reasons: ReasonCode[] = [];
   const clarityNormalized = scoreValue(result.clarity.score, result.clarity.maxScore);
   const recipientValueNormalized = scoreValue(result.recipientValue.score, result.recipientValue.maxScore);
+  const toneNormalized = scoreValue(result.tone.score, result.tone.maxScore);
+  const consequenceNormalized = scoreValue(result.claimConsequence.score, result.claimConsequence.maxScore);
+  const checkableClaim = result.containsCheckableClaim.probability;
 
   let verdict: PolicyDecision["verdict"] = "SEND";
 
@@ -132,53 +145,77 @@ export function evaluatePolicy(input: HoldInput, result: JudgmentResult): Policy
     likelySecretPattern.test(input.draft) ||
     result.secretExposure.probability >= POLICY_THRESHOLDS.secretExposureBlock
   ) {
-    verdict = "BLOCK";
+    verdict = setVerdict(verdict, "BLOCK");
     pushReason(reasons, "secret-exposure");
   }
   if (result.hostility.probability >= POLICY_THRESHOLDS.hostilityBlock) {
-    verdict = "BLOCK";
+    verdict = setVerdict(verdict, "BLOCK");
     pushReason(reasons, "hostility");
   }
 
-  if (verdict !== "BLOCK" && result.needsVerification.probability >= POLICY_THRESHOLDS.needsVerificationHold) {
-    verdict = "HOLD";
-    pushReason(reasons, "needs-verification");
-  }
-  if (verdict !== "BLOCK" && result.recommendedAction.confidence < POLICY_THRESHOLDS.recommendedActionConfidenceHold) {
-    verdict = "HOLD";
-    pushReason(reasons, "low-action-confidence");
+  const missingConditionalSignal =
+    (Boolean(input.intent) && !result.intentAlignment) ||
+    (Boolean(input.conversationContext) && !result.addressesRequest);
+  if (missingConditionalSignal) {
+    verdict = setVerdict(verdict, "HOLD");
+    pushReason(reasons, "missing-signal");
   }
 
-  if (verdict !== "BLOCK" && verdict !== "HOLD" && result.spamRisk.probability >= POLICY_THRESHOLDS.spamRiskRewrite) {
-    verdict = "REWRITE";
+  const needsVerificationHold = result.needsVerification.probability >= POLICY_THRESHOLDS.needsVerificationHold;
+  const highConsequenceClaim =
+    checkableClaim >= POLICY_THRESHOLDS.containsCheckableClaim &&
+    consequenceNormalized >= POLICY_THRESHOLDS.highConsequenceClaim;
+  const uncertainConsequentialClaim =
+    checkableClaim >= POLICY_THRESHOLDS.uncertainClaimFloor &&
+    checkableClaim < POLICY_THRESHOLDS.containsCheckableClaim &&
+    consequenceNormalized >= POLICY_THRESHOLDS.highConsequenceClaim;
+
+  if (needsVerificationHold) {
+    verdict = setVerdict(verdict, "HOLD");
+    pushReason(reasons, "needs-verification");
+  }
+  if (highConsequenceClaim) {
+    verdict = setVerdict(verdict, "HOLD");
+    pushReason(reasons, "high-consequence-claim");
+  }
+  if (uncertainConsequentialClaim) {
+    verdict = setVerdict(verdict, "HOLD");
+    pushReason(reasons, "uncertain-claim");
+  }
+
+  if (
+    toneNormalized >= POLICY_THRESHOLDS.toneRewrite &&
+    result.hostility.probability < POLICY_THRESHOLDS.hostilityBlock
+  ) {
+    verdict = setVerdict(verdict, "REWRITE");
+    pushReason(reasons, "aggressive-tone");
+  }
+  if (result.spamRisk.probability >= POLICY_THRESHOLDS.spamRiskRewrite) {
+    verdict = setVerdict(verdict, "REWRITE");
     pushReason(reasons, "spam-risk");
   }
-  if (verdict !== "BLOCK" && verdict !== "HOLD" && clarityNormalized < POLICY_THRESHOLDS.clarityRewrite) {
-    verdict = "REWRITE";
+  if (clarityNormalized < POLICY_THRESHOLDS.clarityRewrite) {
+    verdict = setVerdict(verdict, "REWRITE");
     pushReason(reasons, "low-clarity");
   }
-  if (verdict !== "BLOCK" && verdict !== "HOLD" && recipientValueNormalized < POLICY_THRESHOLDS.recipientValueRewrite) {
-    verdict = "REWRITE";
+  if (recipientValueNormalized < POLICY_THRESHOLDS.recipientValueRewrite) {
+    verdict = setVerdict(verdict, "REWRITE");
     pushReason(reasons, "low-recipient-value");
   }
   if (
     input.intent &&
     result.intentAlignment &&
-    verdict !== "BLOCK" &&
-    verdict !== "HOLD" &&
     result.intentAlignment.probability < POLICY_THRESHOLDS.intentAlignmentRewrite
   ) {
-    verdict = "REWRITE";
+    verdict = setVerdict(verdict, "REWRITE");
     pushReason(reasons, "intent-mismatch");
   }
   if (
     input.conversationContext &&
     result.addressesRequest &&
-    verdict !== "BLOCK" &&
-    verdict !== "HOLD" &&
     result.addressesRequest.probability < POLICY_THRESHOLDS.addressesRequestRewrite
   ) {
-    verdict = "REWRITE";
+    verdict = setVerdict(verdict, "REWRITE");
     pushReason(reasons, "does-not-address-request");
   }
 

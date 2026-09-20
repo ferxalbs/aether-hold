@@ -1,6 +1,7 @@
 import { EvaluationTimeoutError, evaluateHold, MAX_REQUEST_BYTES } from "@/lib/evaluation";
-import { ProviderNotConfiguredError, resolveProviderConfig } from "@/lib/provider-config";
+import { ProviderConfigurationError, ProviderNotConfiguredError, resolveProviderConfig } from "@/lib/provider-config";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { recordProviderSpend, reserveProviderBudget, SpendingGuardOpenError } from "@/lib/spending";
 import { type EvaluationErrorResponse, holdInputSchema } from "@/packages/core";
 
 export const runtime = "nodejs";
@@ -19,8 +20,12 @@ function json<T>(payload: T, status = 200, extraHeaders: Record<string, string> 
   });
 }
 
-function errorResponse(error: EvaluationErrorResponse, status: number): Response {
-  return json(error, status);
+function errorResponse(
+  error: EvaluationErrorResponse,
+  status: number,
+  extraHeaders: Record<string, string> = {},
+): Response {
+  return json(error, status, extraHeaders);
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -79,7 +84,7 @@ export async function POST(request: Request): Promise<Response> {
       throw new ProviderNotConfiguredError();
     }
 
-    const rateLimit = await checkRateLimit(request);
+    const rateLimit = await checkRateLimit(request, "communication", request.signal);
     if (!rateLimit.allowed) {
       return errorResponse(
         {
@@ -88,17 +93,44 @@ export async function POST(request: Request): Promise<Response> {
           retryable: true,
         },
         429,
+        {
+          "Retry-After": String(rateLimit.retryAfterSeconds),
+          "X-RateLimit-Remaining": String(rateLimit.remaining),
+        },
       );
     }
 
-    const response = await evaluateHold(parsed.data);
+    reserveProviderBudget("communication");
+    const response = await evaluateHold(parsed.data, { signal: request.signal });
+    if (response.estimatedCostUsd !== null) recordProviderSpend("communication", response.estimatedCostUsd);
     return json(response, 200, rateLimit.enabled ? { "X-RateLimit-Remaining": String(rateLimit.remaining) } : {});
   } catch (error) {
+    if (error instanceof SpendingGuardOpenError) {
+      return errorResponse(
+        {
+          error: "RATE_LIMITED",
+          message: "The provider spending guard is open. Please try again later.",
+          retryable: true,
+        },
+        429,
+        { "Retry-After": String(error.retryAfterSeconds) },
+      );
+    }
     if (error instanceof ProviderNotConfiguredError) {
       return errorResponse(
         {
           error: "provider_not_configured",
           message: "HOLD is not configured for a real Jev provider. Please add TYPESAFE_API_KEY and try again.",
+          retryable: false,
+        },
+        503,
+      );
+    }
+    if (error instanceof ProviderConfigurationError) {
+      return errorResponse(
+        {
+          error: "provider_not_configured",
+          message: "HOLD provider configuration is invalid for this environment.",
           retryable: false,
         },
         503,

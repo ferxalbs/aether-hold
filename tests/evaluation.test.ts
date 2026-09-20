@@ -21,15 +21,38 @@ describe("evaluation orchestration", () => {
     });
     const response = await evaluateHold(input, { provider, mode: "fake" });
     expect(calls).toBe(1);
-    expect(response.questionPackVersion).toBe("hold-questions-1.0.0");
+    expect(response.questionPackVersion).toBe("hold-questions-2.0.0-atomic");
     expect(response.policyVersion).toContain("hold-policy");
     expect(response.providerMode).toBe("fake");
     expect(response.estimatedCostUsd).toBe(0);
   });
 
+  it("holds a concrete percentage claim in the development simulation", async () => {
+    const response = await evaluateHold(
+      { draft: "The change improves recovery by 20%.", context: "email" },
+      { provider: new FakeJudgmentProvider(), mode: "fake" },
+    );
+    expect(response.verdict).toBe("HOLD");
+    expect(response.reasons).toContain("needs-verification");
+  });
+
   it("rejects malformed provider output for the route to turn into a safe error", async () => {
     const provider = { evaluate: async () => undefined as unknown as JudgmentResult };
     await expect(evaluateHold(input, { provider, mode: "fake" })).rejects.toThrow();
+  });
+
+  it("passes the request abort signal through to the provider", async () => {
+    const seed = await fakeResult();
+    const controller = new AbortController();
+    let received: AbortSignal | undefined;
+    const provider = {
+      evaluate: async (_input: HoldInput, _pack: unknown, signal?: AbortSignal) => {
+        received = signal;
+        return seed;
+      },
+    };
+    await evaluateHold(input, { provider, mode: "fake", signal: controller.signal });
+    expect(received).toBe(controller.signal);
   });
 
   it("raises a typed timeout without exposing provider errors", async () => {

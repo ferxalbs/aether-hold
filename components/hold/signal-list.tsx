@@ -5,7 +5,13 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
-import type { NormalizedSignal, ReasonCode, Verdict } from "@/packages/core";
+import {
+  type NormalizedSignal,
+  REASON_SIGNAL_MAP,
+  type ReasonCode,
+  SIGNAL_METADATA,
+  type Verdict,
+} from "@/packages/core";
 
 interface SignalListProps {
   signals: NormalizedSignal[];
@@ -20,6 +26,8 @@ const signalOrder = [
   "perceivedIntent",
   "spamRisk",
   "needsVerification",
+  "containsCheckableClaim",
+  "claimConsequence",
   "secretExposure",
   "hostility",
   "addressesRequest",
@@ -30,11 +38,13 @@ export function SignalList({ signals, reasons, verdict }: SignalListProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   // Identify signals that directly match triggered reasons
-  const reasonKeys = new Set(reasons.map((r) => r.toLowerCase()));
+  const reasonKeys = new Set(
+    reasons.map((reason) => REASON_SIGNAL_MAP[reason]).filter((signalId) => signalId !== null),
+  );
 
   const prioritized = [...signals].sort((a, b) => {
-    const aTriggered = reasonKeys.has(a.id.toLowerCase());
-    const bTriggered = reasonKeys.has(b.id.toLowerCase());
+    const aTriggered = reasonKeys.has(a.id);
+    const bTriggered = reasonKeys.has(b.id);
     if (aTriggered && !bTriggered) return -1;
     if (!aTriggered && bTriggered) return 1;
 
@@ -66,7 +76,7 @@ export function SignalList({ signals, reasons, verdict }: SignalListProps) {
 
       <div className="flex flex-col gap-3">
         {primarySignals.map((signal) => {
-          const isTriggered = reasonKeys.has(signal.id.toLowerCase());
+          const isTriggered = reasonKeys.has(signal.id);
           const percentage = Math.round(signal.value * 100);
 
           return (
@@ -85,7 +95,23 @@ export function SignalList({ signals, reasons, verdict }: SignalListProps) {
                 </div>
                 <span className="font-semibold tabular-nums text-foreground">{signal.displayValue}</span>
               </div>
-              <Progress value={percentage} className={`w-full ${indicatorColor}`} />
+              {signal.direction === "categorical" ? (
+                <div className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
+                  {SIGNAL_METADATA[signal.id].informational ? "Informational · " : ""}Categorical signal · confidence{" "}
+                  {percentage}%
+                </div>
+              ) : (
+                <>
+                  <Progress
+                    value={percentage}
+                    className={`w-full ${indicatorColor}`}
+                    aria-label={`${signal.label} ${signal.direction === "higher-is-risk" ? "risk" : "quality"}`}
+                  />
+                  <span className="text-[10px] text-muted-foreground">
+                    {signal.direction === "higher-is-risk" ? "Higher means more risk" : "Higher means stronger fit"}
+                  </span>
+                </>
+              )}
             </div>
           );
         })}
@@ -107,10 +133,23 @@ export function SignalList({ signals, reasons, verdict }: SignalListProps) {
                     <span className="text-muted-foreground font-medium">{signal.label}</span>
                     <span className="font-medium tabular-nums text-muted-foreground">{signal.displayValue}</span>
                   </div>
-                  <Progress
-                    value={percentage}
-                    className="w-full [&_[data-slot=progress-indicator]]:bg-muted-foreground/40"
-                  />
+                  {signal.direction === "categorical" ? (
+                    <div className="text-[10px] text-muted-foreground">
+                      {SIGNAL_METADATA[signal.id].informational ? "Informational · " : ""}Categorical · confidence{" "}
+                      {percentage}%
+                    </div>
+                  ) : (
+                    <>
+                      <Progress
+                        value={percentage}
+                        className="w-full [&_[data-slot=progress-indicator]]:bg-muted-foreground/40"
+                        aria-label={`${signal.label} ${signal.direction === "higher-is-risk" ? "risk" : "quality"}`}
+                      />
+                      <span className="text-[10px] text-muted-foreground">
+                        {signal.direction === "higher-is-risk" ? "Higher means more risk" : "Higher means stronger fit"}
+                      </span>
+                    </>
+                  )}
                 </div>
               );
             })}

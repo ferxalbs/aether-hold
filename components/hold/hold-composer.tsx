@@ -334,7 +334,7 @@ export function HoldComposer({
               {isLoading ? (
                 <>
                   <Spinner className="size-4 text-primary-foreground" />
-                  <span>Judging 11 signals…</span>
+                  <span>Judging atomic signals…</span>
                 </>
               ) : (
                 <>
@@ -366,17 +366,22 @@ export function HoldComposer({
           <Tooltip>
             <TooltipTrigger className="inline-flex items-center gap-1.5 cursor-help hover:text-foreground transition-colors">
               <HugeiconsIcon icon={FlashIcon} strokeWidth={2} className="size-4 text-foreground/70" />
-              <span className="font-medium text-xs text-foreground/80">One Jev request</span>
+              <span className="font-medium text-xs text-foreground/80">One batched request</span>
             </TooltipTrigger>
-            <TooltipContent>11 atomic System One questions run in parallel in a single Jev request.</TooltipContent>
+            <TooltipContent>
+              Atomic questions run in parallel in one provider request; development simulation keeps the same contract.
+            </TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger className="inline-flex items-center gap-1.5 cursor-help hover:text-foreground transition-colors">
               <HugeiconsIcon icon={SecurityCheckIcon} strokeWidth={2} className="size-4 text-foreground/70" />
-              <span className="font-medium text-xs text-foreground/80">Nothing stored</span>
+              <span className="font-medium text-xs text-foreground/80">No HOLD storage</span>
             </TooltipTrigger>
-            <TooltipContent>HOLD has zero persistence. Drafts and judgments are never logged or stored.</TooltipContent>
+            <TooltipContent>
+              Not stored by HOLD. The draft is sent to TypeSafe for judgment and may be sent to the configured evidence
+              provider when Evidence runs; those providers control their own retention.
+            </TooltipContent>
           </Tooltip>
 
           <Tooltip>

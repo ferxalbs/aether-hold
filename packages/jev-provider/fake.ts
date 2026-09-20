@@ -32,7 +32,6 @@ function noul(probability: number): NoulSignal {
 
 function baseResult(): JudgmentResult {
   return {
-    recommendedAction: choice("send", 0.88, ["send", "rewrite", "hold", "block"]),
     perceivedIntent: choice("inform", 0.82, ["inform", "ask", "sell", "support", "vent", "attack", "unclear"]),
     clarity: score(3),
     recipientValue: score(3),
@@ -41,6 +40,8 @@ function baseResult(): JudgmentResult {
     hostility: noul(0.03),
     spamRisk: noul(0.04),
     needsVerification: noul(0.08),
+    containsCheckableClaim: noul(0.04),
+    claimConsequence: score(0),
     model: MODEL,
     usage: { inputTokens: 0, outputTokens: 0 },
   };
@@ -63,8 +64,9 @@ export class FakeJudgmentProvider implements JudgmentProvider {
     this.options = options;
   }
 
-  async evaluate(input: HoldInput, pack: QuestionPack): Promise<JudgmentResult> {
+  async evaluate(input: HoldInput, pack: QuestionPack, signal?: AbortSignal): Promise<JudgmentResult> {
     void pack;
+    if (signal?.aborted) throw signal.reason instanceof Error ? signal.reason : new Error("Evaluation aborted");
     const delayMs = this.options.delayMs ?? Number(process.env.HOLD_FAKE_DELAY_MS || 0);
     if (delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
     if (this.options.failure || process.env.HOLD_FAKE_FAILURE === "1") throw new Error("Fake provider failure");
@@ -83,15 +85,18 @@ export class FakeJudgmentProvider implements JudgmentProvider {
       input.context === "social-post" &&
       (input.draft.trim().length < 80 ||
         /thoughts\?|just saying|big things coming|excited to share/i.test(input.draft));
+    const isMeaningless =
+      input.draft.trim().length < 4 ||
+      /^([a-z])\1{3,}$/i.test(input.draft.trim()) ||
+      !/[a-z]{2,}/i.test(input.draft.trim());
     const needsVerification =
-      /\b(according to|study|research|data shows|will save|guaranteed|always|never|percent|%|today|yesterday|tomorrow|breaking)\b/i.test(
+      /\b(according to|study|research|data shows|will save|always|never|percent|today|yesterday|tomorrow|breaking)\b/i.test(
         text,
-      );
+      ) || /\b\d+(?:\.\d+)?\s*%(?!\s*off\b)/i.test(text);
     const lowConfidence = /\b(maybe|not sure|unclear|guess)\b/i.test(text);
 
     if (hasSecret) {
       result.secretExposure = noul(0.96);
-      result.recommendedAction = choice("block", 0.96, ["send", "rewrite", "hold", "block"]);
     }
 
     if (isHostile) {
@@ -106,29 +111,30 @@ export class FakeJudgmentProvider implements JudgmentProvider {
         "attack",
         "unclear",
       ]);
-      result.recommendedAction = choice("block", 0.91, ["send", "rewrite", "hold", "block"]);
     }
 
     if (isSpam) {
       result.spamRisk = noul(0.82);
       result.perceivedIntent = choice("sell", 0.87, ["inform", "ask", "sell", "support", "vent", "attack", "unclear"]);
-      result.recommendedAction = choice("rewrite", 0.85, ["send", "rewrite", "hold", "block"]);
     }
 
     if (isVague) {
       result.clarity = score(1, 0.86);
       result.recipientValue = score(1, 0.8);
-      result.recommendedAction = choice("rewrite", 0.84, ["send", "rewrite", "hold", "block"]);
+    }
+
+    if (isMeaningless) {
+      result.clarity = score(0, 0.9);
+      result.recipientValue = score(0, 0.9);
     }
 
     if (needsVerification) {
       result.needsVerification = noul(0.78);
-      result.recommendedAction = choice("hold", 0.82, ["send", "rewrite", "hold", "block"]);
+      result.containsCheckableClaim = noul(0.9);
+      result.claimConsequence = score(/health|safety|legal|financial|money|security/i.test(text) ? 3 : 2, 0.82);
     }
 
-    if (lowConfidence) {
-      result.recommendedAction = choice("hold", 0.48, ["send", "rewrite", "hold", "block"]);
-    }
+    if (lowConfidence) result.containsCheckableClaim = noul(Math.max(result.containsCheckableClaim.probability, 0.52));
 
     if (input.intent) {
       const mismatch = /apolog|de-escalat|reassure/i.test(input.intent) && (isHostile || isSpam);

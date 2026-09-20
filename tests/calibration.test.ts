@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
-import fixture from "@/calibration/hold-calibration-v1.json";
+import fixture from "@/calibration/hold-calibration-v2.json";
 
 describe("versioned calibration fixture", () => {
-  it("contains 30 independently labeled representative drafts", () => {
-    expect(fixture.version).toBe("hold-calibration-v1");
-    expect(fixture.cases).toHaveLength(30);
+  it("contains 60 independently labeled representative drafts", () => {
+    expect(fixture.version).toBe("hold-calibration-v2");
+    expect(fixture.cases).toHaveLength(60);
 
-    expect(fixture.cases.filter((entry) => entry.context === "email")).toHaveLength(10);
-    expect(fixture.cases.filter((entry) => entry.context === "social-post")).toHaveLength(10);
-    expect(fixture.cases.filter((entry) => entry.context === "support-reply")).toHaveLength(10);
+    expect(fixture.cases.filter((entry) => entry.context === "email")).toHaveLength(20);
+    expect(fixture.cases.filter((entry) => entry.context === "social-post")).toHaveLength(20);
+    expect(fixture.cases.filter((entry) => entry.context === "support-reply")).toHaveLength(20);
 
     expect(
       Object.fromEntries(
@@ -17,7 +17,7 @@ describe("versioned calibration fixture", () => {
           fixture.cases.filter((entry) => entry.expectedVerdict === verdict).length,
         ]),
       ),
-    ).toEqual({ SEND: 8, REWRITE: 8, HOLD: 7, BLOCK: 7 });
+    ).toEqual({ SEND: 19, REWRITE: 17, HOLD: 12, BLOCK: 12 });
   });
 
   it("keeps human labels in the fixture instead of embedding model output", () => {

@@ -1,0 +1,42 @@
+name: Calibration case
+description: Propose a safe, manually labeled synthetic calibration example.
+title: "[calibration] "
+labels: [calibration]
+body:
+  - type: markdown
+    attributes:
+      value: Use only synthetic text. Never paste private communications, credentials, or personal data.
+  - type: dropdown
+    id: context
+    attributes:
+      label: Communication context
+      options:
+        - email
+        - social-post
+        - support-reply
+    validations:
+      required: true
+  - type: textarea
+    id: draft
+    attributes:
+      label: Synthetic draft
+    validations:
+      required: true
+  - type: dropdown
+    id: verdict
+    attributes:
+      label: Human expected verdict
+      options:
+        - SEND
+        - REWRITE
+        - HOLD
+        - BLOCK
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Label rationale
+    validations:
+      required: true
+

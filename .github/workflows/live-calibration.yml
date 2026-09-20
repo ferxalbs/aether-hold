@@ -1,0 +1,52 @@
+name: Live calibration
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - name: Require live provider secrets
+        env:
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+          EVIDENCE_SEARCH_URL: ${{ secrets.EVIDENCE_SEARCH_URL }}
+          EVIDENCE_SEARCH_API_KEY: ${{ secrets.EVIDENCE_SEARCH_API_KEY }}
+        run: |
+          test -n "$TYPESAFE_API_KEY"
+          test -n "$EVIDENCE_SEARCH_URL"
+          test -n "$EVIDENCE_SEARCH_API_KEY"
+      - name: Run live Jev calibration
+        env:
+          RUN_LIVE_JEV: "1"
+          HOLD_PROVIDER: typesafe
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+          TYPESAFE_DEFAULT_MODEL: ${{ secrets.TYPESAFE_DEFAULT_MODEL }}
+        run: bun run test:live-jev
+      - name: Run live Evidence smoke
+        env:
+          RUN_LIVE_EVIDENCE: "1"
+          HOLD_PROVIDER: typesafe
+          HOLD_EVIDENCE_ENABLED: "1"
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+          TYPESAFE_DEFAULT_MODEL: ${{ secrets.TYPESAFE_DEFAULT_MODEL }}
+          EVIDENCE_SEARCH_URL: ${{ secrets.EVIDENCE_SEARCH_URL }}
+          EVIDENCE_SEARCH_API_KEY: ${{ secrets.EVIDENCE_SEARCH_API_KEY }}
+        run: bun run test:live-evidence
+      - name: Upload calibration report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hold-live-calibration
+          path: |
+            calibration/hold-calibration-report.md
+            calibration/live-jev-smoke.latest.json

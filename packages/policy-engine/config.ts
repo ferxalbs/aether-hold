@@ -1,10 +1,13 @@
-export const POLICY_VERSION = "hold-policy-1.0.0-experimental";
+export const POLICY_VERSION = "hold-policy-2.0.0-atomic";
 
 export const POLICY_THRESHOLDS = {
   secretExposureBlock: 0.75,
   hostilityBlock: 0.85,
   needsVerificationHold: 0.7,
-  recommendedActionConfidenceHold: 0.6,
+  containsCheckableClaim: 0.65,
+  uncertainClaimFloor: 0.45,
+  highConsequenceClaim: 0.67,
+  toneRewrite: 0.66,
   spamRiskRewrite: 0.65,
   clarityRewrite: 0.45,
   recipientValueRewrite: 0.45,

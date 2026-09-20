@@ -31,7 +31,7 @@ export function JudgmentLoading() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Spinner className="size-4 text-foreground" />
-          <span className="font-semibold text-sm text-foreground">Judging 11 signals…</span>
+          <span className="font-semibold text-sm text-foreground">Judging atomic signals…</span>
         </div>
         <Badge variant="outline" className="text-[11px] font-normal">
           One batched request

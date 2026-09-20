@@ -38,10 +38,22 @@ const thresholdRows = [
     "Unsubstantiated factual or statistical claims",
   ],
   [
-    "Recommended action confidence",
-    `< ${POLICY_THRESHOLDS.recommendedActionConfidenceHold}`,
+    "Checkable claim",
+    `≥ ${POLICY_THRESHOLDS.containsCheckableClaim}`,
     "HOLD",
-    "Low distribution confidence for choice judgment",
+    "A claim is present and its consequence or verification signal requires evidence",
+  ],
+  [
+    "High-consequence claim",
+    `≥ ${POLICY_THRESHOLDS.highConsequenceClaim}`,
+    "HOLD",
+    "A material or severe claim cannot clear the policy without evidence",
+  ],
+  [
+    "Aggressive tone",
+    `≥ ${POLICY_THRESHOLDS.toneRewrite}`,
+    "REWRITE",
+    "Aggressive tone below the separate BLOCK hostility threshold",
   ],
   [
     "Spam risk",
@@ -105,7 +117,7 @@ export default function MethodPage() {
             <span>Methodology & Architecture</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-            A useful second opinion, with the edges showing.
+            A deterministic pre-send judgment, with the edges showing.
           </h1>
           <p className="text-lg text-foreground/80 leading-relaxed max-w-2xl font-normal">
             HOLD is an open-source pre-send judgment layer. It uses calibrated, typed AI judgments as signals—not as an
@@ -122,9 +134,9 @@ export default function MethodPage() {
             <h2 className="text-xl font-bold tracking-tight">1. How HOLD works</h2>
           </div>
           <p className="text-base text-foreground/80 leading-relaxed">
-            When you submit a draft, HOLD makes exactly <strong>one batched request</strong> to TypeSafe Jev. It asks 11
-            independent, atomic questions in parallel across the draft, context, and intent. The model returns
-            calibrated probabilities and discrete choices, not generated text.
+            When you submit a draft, HOLD makes exactly <strong>one batched request</strong> to TypeSafe Jev. It asks
+            atomic independent questions in parallel across the draft, context, and intent. The model returns calibrated
+            probabilities and discrete choices, not generated text.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
             <Card className="bg-card border-border/70 shadow-xs">
@@ -142,7 +154,7 @@ export default function MethodPage() {
                 <CardTitle className="text-base font-bold">Parallel Jev query</CardTitle>
               </CardHeader>
               <CardContent className="text-sm text-foreground/80 leading-relaxed">
-                TypeSafe Jev evaluates 11 atomic dimensions in parallel in a single sub-second roundtrip.
+                TypeSafe Jev evaluates the atomic dimensions in parallel in a single request.
               </CardContent>
             </Card>
             <Card className="bg-card border-border/70 shadow-xs">
@@ -177,7 +189,7 @@ export default function MethodPage() {
               </CardHeader>
               <CardContent className="text-sm text-foreground/80 leading-relaxed">
                 Picks one option from a defined set with a full probability distribution and confidence score (e.g.
-                recommended action, tone classification).
+                perceived intent). HOLD never asks Jev for the final verdict.
               </CardContent>
             </Card>
             <Card className="border-border/70 shadow-xs">
@@ -234,7 +246,8 @@ export default function MethodPage() {
                 HOLD
               </Badge>
               <span className="text-foreground/85">
-                Triggered when factual claims require human verification or model confidence is low.
+                Triggered when claims require evidence, a consequential claim is present, or a required signal is
+                missing.
               </span>
             </div>
             <div className="flex items-center gap-3.5">
@@ -332,8 +345,14 @@ export default function MethodPage() {
               </p>
               <p>
                 <strong className="text-foreground">Provider transit:</strong> Evaluations are processed securely
-                through the TypeSafe Jev API. Under TypeSafe&apos;s API policies, data sent for inference is not
-                retained for model training. Review TypeSafe&apos;s current documentation for enterprise guarantees.
+                through the TypeSafe Jev API. Retention, training use, and other processing are controlled by
+                TypeSafe&apos;s current terms; review the provider&apos;s documentation before deployment.
+              </p>
+              <p>
+                <strong className="text-foreground">Evidence transit:</strong> When you explicitly verify claims,
+                TypeSafe receives the bounded claim-selection and reranking state. The configured search provider
+                receives only the selected search query; HOLD does not send the draft, audience, intent, or thread
+                history to that provider.
               </p>
             </CardContent>
           </Card>
@@ -403,7 +422,7 @@ export default function MethodPage() {
             </span>
           </div>
           <a
-            href="https://github.com"
+            href="https://github.com/ferxalbs/aether-hold"
             target="_blank"
             rel="noreferrer"
             className={buttonVariants({

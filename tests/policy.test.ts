@@ -6,12 +6,6 @@ const baseInput: HoldInput = { draft: "A clear professional update with a useful
 
 function result(overrides: Partial<JudgmentResult> = {}): JudgmentResult {
   return {
-    recommendedAction: {
-      kind: "choice",
-      choice: "send",
-      confidence: 0.86,
-      probabilities: { send: 0.86, rewrite: 0.06, hold: 0.05, block: 0.03 },
-    },
     perceivedIntent: {
       kind: "choice",
       choice: "inform",
@@ -43,6 +37,14 @@ function result(overrides: Partial<JudgmentResult> = {}): JudgmentResult {
     hostility: { kind: "noul", probability: 0.02 },
     spamRisk: { kind: "noul", probability: 0.04 },
     needsVerification: { kind: "noul", probability: 0.04 },
+    containsCheckableClaim: { kind: "noul", probability: 0.02 },
+    claimConsequence: {
+      kind: "score",
+      score: 0,
+      maxScore: 3,
+      confidence: 0.84,
+      probabilities: { "0": 0.84, "1": 0.1, "2": 0.04, "3": 0.02 },
+    },
     model: "fake-test",
     ...overrides,
   };
@@ -77,6 +79,15 @@ describe("HOLD deterministic policy", () => {
     expect(decision.reasons).toContain("secret-exposure");
   });
 
+  it("blocks requests to paste passwords or access tokens even when the provider is uncertain", () => {
+    const decision = evaluatePolicy(
+      { ...baseInput, draft: "Send us your password and access token here so we can reset the account." },
+      result({ secretExposure: { kind: "noul", probability: 0.2 } }),
+    );
+    expect(decision.verdict).toBe("BLOCK");
+    expect(decision.reasons).toContain("secret-exposure");
+  });
+
   it("returns BLOCK for hostility, even when another rule also matches", () => {
     const decision = evaluatePolicy(
       baseInput,
@@ -101,13 +112,31 @@ describe("HOLD deterministic policy", () => {
     expect(decision.reasons).toContain("intent-mismatch");
   });
 
-  it("returns HOLD for low Choice confidence", () => {
+  it("returns HOLD for a high-consequence checkable claim", () => {
     const decision = evaluatePolicy(
       baseInput,
-      result({ recommendedAction: { ...result().recommendedAction, confidence: 0.42 } }),
+      result({
+        containsCheckableClaim: { kind: "noul", probability: 0.9 },
+        claimConsequence: { ...result().claimConsequence, score: 3 },
+      }),
     );
     expect(decision.verdict).toBe("HOLD");
-    expect(decision.reasons).toContain("low-action-confidence");
+    expect(decision.reasons).toContain("high-consequence-claim");
+  });
+
+  it("rewrites aggressive tone below the block hostility threshold", () => {
+    const decision = evaluatePolicy(
+      baseInput,
+      result({ tone: { ...result().tone, score: 2 }, hostility: { kind: "noul", probability: 0.4 } }),
+    );
+    expect(decision.verdict).toBe("REWRITE");
+    expect(decision.reasons).toContain("aggressive-tone");
+  });
+
+  it("holds instead of treating missing conditional signals as safe", () => {
+    const decision = evaluatePolicy({ ...baseInput, intent: "Resolve the issue" }, result());
+    expect(decision.verdict).toBe("HOLD");
+    expect(decision.reasons).toContain("missing-signal");
   });
 
   it("does not treat a Noul probability as Choice confidence", () => {
